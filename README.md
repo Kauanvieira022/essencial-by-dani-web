@@ -6,7 +6,7 @@ O Essencial By Dani é um sistema web para organizar o estoque da loja. A propos
 
 O projeto está sendo desenvolvido com HTML, CSS e JavaScript no front-end, Node.js e Express no servidor e SQLite como banco de dados. O navegador não acessa o arquivo do banco diretamente: a comunicação será feita por uma API no servidor.
 
-## Como usar o protótipo
+## Como usar o sistema
 
 ### 1. Iniciar o sistema
 
@@ -17,42 +17,43 @@ npm install
 npm run dev
 ```
 
-Abra `http://localhost:3000` no navegador. O servidor inicializa o esquema SQLite e disponibiliza a rota `GET /api/health`.
+Abra `http://localhost:3000` no navegador. O servidor inicializa o esquema SQLite e disponibiliza a rota `GET /api/health`. Na primeira execução, o catálogo e o histórico começam vazios; não há registros de exemplo.
 
 ### 2. Consultar a visão geral
 
-Na tela **Visão geral**, confira a quantidade de produtos e unidades, os itens que precisam de reposição, o saldo por categoria e as movimentações recentes. No primeiro acesso, os indicadores começam zerados porque não há cadastros de exemplo. Use **Cadastrar produto** ou os botões **Registrar entrada** e **Registrar saída** para começar.
+Na tela **Visão geral**, confira a quantidade de produtos e unidades, os itens que precisam de reposição, o saldo por categoria e as movimentações recentes. Se ainda não houver produtos, use **Cadastrar produto**. Os atalhos de entrada e saída ficam disponíveis para os próximos registros.
 
 ### 3. Cadastrar e localizar produtos
 
-Abra **Produtos** no menu lateral e selecione **Novo produto**. Informe o nome, a categoria e o estoque mínimo. Fornecedor e preço são opcionais; informe o estoque inicial se houver saldo. Para alterar um cadastro, use o botão de edição na linha do produto.
+Abra **Produtos** no menu lateral e selecione **Novo produto**. Informe o nome, a categoria e o estoque mínimo. Fornecedor e preço são opcionais; informe o estoque inicial se houver saldo. Se o estoque inicial for maior que zero, o sistema registra também a entrada inicial no histórico. Para alterar um cadastro, use o botão de edição na linha do produto.
 
 Na mesma tela, pesquise por nome, categoria ou fornecedor. Também é possível filtrar por categoria ou mostrar apenas produtos no mínimo ou abaixo dele.
 
 ### 4. Registrar uma entrada
 
-Abra **Entrada de estoque**, escolha o produto, informe a quantidade recebida e, se quiser, adicione uma observação, como a reposição do fornecedor. Confirme a entrada para atualizar o saldo demonstrativo e incluir o registro no histórico.
+Abra **Entrada de estoque**, escolha o produto, informe a quantidade recebida e, se quiser, adicione uma observação, como a reposição do fornecedor. Confirme a entrada para atualizar o saldo no banco e incluir o registro no histórico. A confirmação mostra o novo saldo e oferece atalhos para outra movimentação ou para o histórico. Se não houver produtos, use **Cadastrar primeiro produto**.
 
 ### 5. Registrar uma saída
 
-Abra **Saída de estoque**, escolha um produto que tenha saldo, informe a quantidade retirada e, opcionalmente, escreva uma observação. A quantidade não pode ultrapassar o saldo disponível. Confirme a saída para atualizar o saldo demonstrativo e registrar a movimentação.
+Abra **Saída de estoque**, escolha um produto que tenha saldo, informe a quantidade retirada e, opcionalmente, escreva uma observação. Produtos sem saldo ficam indisponíveis e a quantidade não pode ultrapassar o saldo atual. Confirme a saída para atualizar o saldo no banco e registrar a movimentação. A confirmação mostra o novo saldo e oferece atalhos para outra movimentação ou para o histórico.
 
 ### 6. Consultar movimentações
 
-Abra **Movimentações** para consultar entradas e saídas. Use a busca para localizar registros por produto ou observação e o filtro para exibir apenas um tipo de movimentação. Os registros mais recentes aparecem primeiro.
+Abra **Movimentações** para consultar entradas e saídas. Use a busca para localizar registros por produto ou observação; os filtros permitem restringir por tipo, produto e período. Os registros mais recentes aparecem primeiro.
 
 O menu lateral permite alternar entre as telas; os botões voltar e avançar do navegador também acompanham a navegação.
 
-> **Atenção:** o sistema inicia sem produtos ou movimentações de exemplo. Os cadastros e registros criados nesta versão ficam apenas na memória do navegador, não são gravados no SQLite e são perdidos ao recarregar a página. A integração com a API e a persistência ainda serão implementadas.
+> **Atenção:** o sistema inicia sem produtos ou movimentações de exemplo. Cadastros e movimentações são gravados no SQLite e continuam disponíveis depois de fechar ou recarregar a página.
 
 ## Organização do projeto
 
-- `client/data`: estado inicial vazio, categorias disponíveis e rótulos das telas.
+- `client/data`: estado carregado pela API, categorias disponíveis e rótulos das telas.
+- `client/lib/api.js`: comunicação do navegador com as rotas do servidor.
 - `client/components`: componentes reutilizáveis, como o formulário de produto e os avisos.
 - `client/lib`: formatação, ícones e elementos compartilhados da interface.
 - `client/screens`: apresentação de cada tela.
 - `client/app.js`: navegação e coordenação das ações e dos formulários.
-- `server`: inicialização do Express, banco SQLite e esquema das tabelas.
+- `server`: inicialização do Express, rotas da API, banco SQLite, serialização dos registros e esquema das tabelas.
 
 O front-end usa módulos JavaScript nativos, sem framework ou etapa de compilação.
 
@@ -62,7 +63,7 @@ O servidor cria as tabelas `products` e `stock_movements` na inicialização. O 
 
 Por padrão, o arquivo SQLite fica fora do repositório, na pasta de dados local do usuário. A variável de ambiente `DATABASE_PATH` permite definir outro caminho. O banco e os arquivos auxiliares não devem ser versionados.
 
-O banco e o esquema estão preparados, mas as telas ainda não estão integradas à API. Produtos e movimentações criados pela interface permanecem em memória durante a sessão; a API, as regras de negócio no servidor e a persistência serão desenvolvidas nas próximas etapas.
+As telas usam a API para listar e cadastrar produtos, editar cadastros, criar movimentações e consultar o histórico. O servidor valida os dados, impede saídas acima do saldo e atualiza saldo e histórico na mesma transação SQLite.
 
 ## Padrões visuais
 

@@ -1,6 +1,8 @@
 const express = require('express');
 const path = require('node:path');
-require('./database');
+const database = require('./database');
+const createProductsRouter = require('./routes/products');
+const createMovementsRouter = require('./routes/movements');
 
 const app = express();
 const projectRoot = path.resolve(__dirname, '..');
@@ -13,6 +15,9 @@ app.use('/client', express.static(path.join(projectRoot, 'client'), { dotfiles: 
 app.get('/api/health', (_request, response) => {
   response.json({ status: 'ok', banco: 'SQLite' });
 });
+
+app.use('/api/products', createProductsRouter(database));
+app.use('/api/movements', createMovementsRouter(database));
 
 app.get('/vendor/lucide.js', (_request, response) => {
   response.sendFile(path.join(projectRoot, 'node_modules', 'lucide', 'dist', 'umd', 'lucide.min.js'));
