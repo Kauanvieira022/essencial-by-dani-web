@@ -48,8 +48,8 @@ export function movementRows(list, products, emptyText = 'Nenhuma movimentação
   }).join('');
 }
 
-export function productRows(list) {
-  if (!list.length) return '<tr><td colspan="7"><div class="empty-state">Nenhum produto corresponde a esta busca.</div></td></tr>';
+export function productRows(list, emptyText = 'Nenhum produto corresponde a esta busca.') {
+  if (!list.length) return `<tr><td colspan="7"><div class="empty-state">${emptyText}</div></td></tr>`;
   return list.map((product) => {
     const state = stockState(product);
     return `<tr>

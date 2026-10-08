@@ -1,4 +1,4 @@
-import { categoryOptions, movements, products, viewLabels } from './data/demo-data.js';
+import { categoryOptions, movements, products, viewLabels } from './data/state.js';
 import { movementRows, productById, productRows, renderLucideIcons } from './lib/ui.js';
 import { renderProductModal } from './components/product-modal.js';
 import { showToast } from './components/toast.js';
@@ -116,7 +116,7 @@ function bindMovementForm() {
     if (type === 'Saída' && quantity > product.quantity) return showToast(`Saldo insuficiente. Há ${product.quantity} unidade(s) disponível(is).`, true);
     product.quantity += type === 'Entrada' ? quantity : -quantity;
     movements.unshift({
-      id: Math.max(1000, ...movements.map((item) => item.id)) + 1,
+      id: Math.max(0, ...movements.map((item) => item.id)) + 1,
       productId: product.id,
       type,
       quantity,
@@ -124,7 +124,7 @@ function bindMovementForm() {
       date: new Date().toISOString(),
     });
     render();
-    showToast(`${type} registrada. Os dados demonstrativos não são persistidos.`);
+    showToast(`${type} registrada nesta sessão; ainda não salva no banco.`);
   });
   updateMovementQuantityLimit();
 }
@@ -172,7 +172,7 @@ function openProductModal(productId = null) {
     else products.push({ id: Math.max(0, ...products.map((item) => item.id)) + 1, ...data, quantity });
     modalRoot.innerHTML = '';
     render();
-    showToast(editing ? 'Produto atualizado no protótipo.' : 'Produto adicionado ao protótipo.');
+    showToast(editing ? 'Produto atualizado nesta sessão; ainda não salvo no banco.' : 'Produto cadastrado nesta sessão; ainda não salvo no banco.');
   });
 }
 

@@ -21,11 +21,11 @@ Abra `http://localhost:3000` no navegador. O servidor inicializa o esquema SQLit
 
 ### 2. Consultar a visão geral
 
-Na tela **Visão geral**, confira a quantidade de produtos e unidades, os itens que precisam de reposição, o saldo por categoria e as movimentações recentes. Use os botões **Registrar entrada** ou **Registrar saída** para iniciar uma movimentação diretamente.
+Na tela **Visão geral**, confira a quantidade de produtos e unidades, os itens que precisam de reposição, o saldo por categoria e as movimentações recentes. No primeiro acesso, os indicadores começam zerados porque não há cadastros de exemplo. Use **Cadastrar produto** ou os botões **Registrar entrada** e **Registrar saída** para começar.
 
 ### 3. Cadastrar e localizar produtos
 
-Abra **Produtos** no menu lateral e selecione **Novo produto**. Informe o nome e, quando disponíveis, a categoria, o fornecedor, o preço, o estoque inicial e o limite mínimo. Para alterar um cadastro, use o botão de edição na linha do produto.
+Abra **Produtos** no menu lateral e selecione **Novo produto**. Informe o nome, a categoria e o estoque mínimo. Fornecedor e preço são opcionais; informe o estoque inicial se houver saldo. Para alterar um cadastro, use o botão de edição na linha do produto.
 
 Na mesma tela, pesquise por nome, categoria ou fornecedor. Também é possível filtrar por categoria ou mostrar apenas produtos no mínimo ou abaixo dele.
 
@@ -43,11 +43,11 @@ Abra **Movimentações** para consultar entradas e saídas. Use a busca para loc
 
 O menu lateral permite alternar entre as telas; os botões voltar e avançar do navegador também acompanham a navegação.
 
-> **Atenção:** o protótipo usa dados fictícios armazenados apenas na memória do navegador. As alterações feitas nas telas não são gravadas no SQLite e são perdidas ao recarregar a página. A integração com a API e a persistência ainda serão implementadas.
+> **Atenção:** o sistema inicia sem produtos ou movimentações de exemplo. Os cadastros e registros criados nesta versão ficam apenas na memória do navegador, não são gravados no SQLite e são perdidos ao recarregar a página. A integração com a API e a persistência ainda serão implementadas.
 
 ## Organização do projeto
 
-- `client/data`: dados demonstrativos e rótulos das telas.
+- `client/data`: estado inicial vazio, categorias disponíveis e rótulos das telas.
 - `client/components`: componentes reutilizáveis, como o formulário de produto e os avisos.
 - `client/lib`: formatação, ícones e elementos compartilhados da interface.
 - `client/screens`: apresentação de cada tela.
@@ -62,7 +62,7 @@ O servidor cria as tabelas `products` e `stock_movements` na inicialização. O 
 
 Por padrão, o arquivo SQLite fica fora do repositório, na pasta de dados local do usuário. A variável de ambiente `DATABASE_PATH` permite definir outro caminho. O banco e os arquivos auxiliares não devem ser versionados.
 
-Embora o banco e o esquema estejam preparados, as telas ainda usam dados demonstrativos em memória. A API de produtos e movimentações, as regras de negócio no servidor e a integração da interface com o banco serão desenvolvidas nas próximas etapas.
+O banco e o esquema estão preparados, mas as telas ainda não estão integradas à API. Produtos e movimentações criados pela interface permanecem em memória durante a sessão; a API, as regras de negócio no servidor e a persistência serão desenvolvidas nas próximas etapas.
 
 ## Padrões visuais
 
@@ -74,4 +74,4 @@ Embora o banco e o esquema estejam preparados, as telas ainda usam dados demonst
 
 O cadastro inclui o preço do produto, conforme o sistema de referência. O documento também menciona “valores” das movimentações, mas não esclarece se são valores monetários ou quantidades. Por isso, as telas de entrada e saída mostram quantidade e observação; o significado de valores por movimentação precisa ser definido antes da implementação dessa regra.
 
-Os exemplos de produtos e movimentações são fictícios. A paleta azul e rosa é provisória e deriva das cores usadas na janela principal do aplicativo de referência; não substitui um guia oficial de marca.
+As categorias disponíveis estão definidas no protótipo. A paleta azul e rosa é provisória e deriva das cores usadas na janela principal do aplicativo de referência; não substitui um guia oficial de marca.
