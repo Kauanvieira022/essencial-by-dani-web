@@ -1,9 +1,12 @@
 node_modules/
+data/
 .env
 .env.*
 !.env.example
 *.sqlite
 *.sqlite3
 *.db
-Thumbs.db
+*.sqlite-shm
+*.sqlite-wal
 .DS_Store
+Thumbs.db

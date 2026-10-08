@@ -6,11 +6,26 @@ Repositório principal da aplicação web completa de gestão de estoque da Esse
 
 O sistema deverá permitir cadastrar, pesquisar e consultar produtos, registrar entradas e saídas, acompanhar saldos, sinalizar estoque mínimo e consultar o histórico de movimentações.
 
-Arquitetura prevista no projeto: HTML, CSS e JavaScript no front-end; Node.js e Express no servidor; SQLite para persistência. A interface não acessará o arquivo do banco diretamente.
+Arquitetura do projeto: HTML, CSS e JavaScript no front-end; Node.js e Express no servidor; SQLite para persistência. A interface não acessará o arquivo do banco diretamente.
+
+## Executar localmente
+
+Requer Node.js 22 ou superior.
+
+```sh
+npm install
+npm run dev
+```
+
+Abra `http://localhost:3000`. O servidor Express também inicializa o banco e disponibiliza `GET /api/health`.
+
+Por padrão, o arquivo SQLite fica fora do repositório, na pasta de dados local do usuário. A variável de ambiente `DATABASE_PATH` permite definir outro caminho. O banco e seus arquivos auxiliares não devem ser versionados.
 
 ## Estado atual
 
-A primeira etapa é a interface navegável com dados demonstrativos. Abra `index.html` em um navegador para visualizar as telas. O front-end usa HTML, CSS e JavaScript sem frameworks; as fontes personalizadas carregam do Google Fonts com alternativas do sistema.
+A base do servidor e o esquema inicial do banco estão preparados. As tabelas `products` e `stock_movements` são criadas automaticamente na inicialização; o preço do produto é armazenado em centavos para evitar imprecisão decimal, e as movimentações preservam o vínculo com o produto.
+
+A interface ainda usa dados demonstrativos em memória. A API de produtos e movimentações e a integração das telas com o banco serão implementadas nas próximas etapas. O front-end usa HTML, CSS e JavaScript sem frameworks; as fontes personalizadas carregam do Google Fonts com alternativas do sistema.
 
 ## Telas e funcionalidades prototipadas
 
@@ -21,7 +36,7 @@ A primeira etapa é a interface navegável com dados demonstrativos. Abra `index
 
 ## Limites atuais e decisões pendentes
 
-Os dados ainda são demonstrativos e ficam apenas na memória do navegador; recarregar a página restaura os exemplos. API, regras no servidor e persistência em SQLite ainda serão implementadas.
+Os dados mostrados nas telas ainda são demonstrativos e ficam apenas na memória do navegador; recarregar a página restaura os exemplos. A API, as regras de negócio no servidor e a persistência conectada à interface ainda serão implementadas.
 
 O cadastro inclui preço do produto, conforme o sistema de referência. O documento também menciona “valores” das movimentações, mas não esclarece se são monetários ou apenas quantidades. Por isso, as telas de entrada e saída mostram quantidade e observação; o significado de valores por movimentação fica pendente de definição.
 

@@ -1,0 +1,17 @@
+{
+  "name": "essencial-by-dani-web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Sistema web de gestão de estoque da Essencial By Dani",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "better-sqlite3": "^13.0.3",
+    "express": "^5.1.0"
+  }
+}
