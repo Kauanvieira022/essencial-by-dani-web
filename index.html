@@ -11,12 +11,11 @@
   <body>
     <div class="app-shell">
       <aside class="sidebar" id="sidebar">
-        <a class="brand" href="#inicio" aria-label="Essencial By Dani — início" data-view="dashboard">
-          <span class="brand-mark"><i class="icon" data-lucide="leaf" aria-hidden="true"></i></span>
-          <span class="brand-name">essencial <b>by dani</b><small>GESTÃO DE ESTOQUE</small></span>
-        </a>
+        <button class="brand" type="button" aria-label="Essencial By Dani — início" data-view="dashboard">
+          <span class="brand-name">essencial <b>by dani</b></span>
+        </button>
 
-        <div class="nav-label">MENU PRINCIPAL</div>
+        <div class="nav-label">Estoque</div>
         <nav class="main-nav" aria-label="Navegação principal">
           <button class="nav-item is-active" type="button" data-view="dashboard"><i class="icon" data-lucide="layout-dashboard" aria-hidden="true"></i><span>Visão geral</span></button>
           <button class="nav-item" type="button" data-view="products"><i class="icon" data-lucide="package" aria-hidden="true"></i><span>Produtos</span><span class="nav-count" id="navProductCount">0</span></button>
@@ -25,17 +24,12 @@
           <button class="nav-item" type="button" data-view="reports"><i class="icon" data-lucide="chart-no-axes-combined" aria-hidden="true"></i><span>Movimentações</span></button>
         </nav>
 
-        <div class="sidebar-bottom">
-          <div class="help-card"><span class="help-icon"><i class="icon" data-lucide="leaf" aria-hidden="true"></i></span><strong>Estoque em harmonia</strong><p>Registre cada movimento para manter seus saldos sempre organizados.</p></div>
-          <div class="profile-row"><span class="avatar">D</span><span class="profile-copy"><b>Dani</b><small>Responsável pelo estoque</small></span><span class="profile-more" aria-hidden="true"><i class="icon" data-lucide="ellipsis"></i></span></div>
-        </div>
       </aside>
 
       <main class="main-area">
         <header class="topbar">
-          <button class="icon-button mobile-menu" id="menuToggle" type="button" aria-label="Abrir menu"><i class="icon" data-lucide="menu" aria-hidden="true"></i></button>
-          <div class="breadcrumb"><span>Essencial By Dani</span><i class="icon" data-lucide="chevron-right" aria-hidden="true"></i><b id="breadcrumbCurrent">Visão geral</b></div>
-          <div class="topbar-right"><span class="demo-pill"><i></i> Protótipo demonstrativo</span><span class="topbar-divider"></span><button class="icon-button notification-button" type="button" aria-label="Notificações"><i class="icon" data-lucide="bell" aria-hidden="true"></i><i></i></button><span class="topbar-date" id="topbarDate"></span></div>
+          <button class="icon-button mobile-menu" id="menuToggle" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="sidebar"><i class="icon" data-lucide="menu" aria-hidden="true"></i></button>
+          <div class="topbar-right"><span class="demo-pill"><i aria-hidden="true"></i> Dados demonstrativos</span></div>
         </header>
         <div class="page-content" id="pageContent" tabindex="-1"></div>
       </main>
@@ -43,7 +37,7 @@
 
     <div class="modal-root" id="modalRoot"></div>
     <div class="toast-region" id="toastRegion" aria-live="polite" aria-atomic="true"></div>
-    <script src="/vendor/lucide.js" defer></script>
-    <script src="app.js" defer></script>
+    <script src="/vendor/lucide.js"></script>
+    <script type="module" src="/client/app.js"></script>
   </body>
 </html>

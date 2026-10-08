@@ -25,7 +25,7 @@ Por padrão, o arquivo SQLite fica fora do repositório, na pasta de dados local
 
 A base do servidor e o esquema inicial do banco estão preparados. As tabelas `products` e `stock_movements` são criadas automaticamente na inicialização; o preço do produto é armazenado em centavos para evitar imprecisão decimal, e as movimentações preservam o vínculo com o produto.
 
-A interface ainda usa dados demonstrativos em memória. A API de produtos e movimentações e a integração das telas com o banco serão implementadas nas próximas etapas. O front-end usa HTML, CSS e JavaScript sem frameworks; as fontes personalizadas carregam do Google Fonts com alternativas do sistema.
+A interface ainda usa dados demonstrativos em memória. A API de produtos e movimentações e a integração das telas com o banco serão implementadas nas próximas etapas. O front-end usa HTML, CSS e módulos JavaScript nativos, sem framework ou etapa de compilação. Os dados de exemplo ficam em `client/data`, os componentes reutilizáveis em `client/components`, os recursos compartilhados em `client/lib`, as telas em `client/screens` e a navegação e os fluxos em `client/app.js`.
 
 ## Padrões visuais
 
@@ -36,9 +36,11 @@ A interface ainda usa dados demonstrativos em memória. A API de produtos e movi
 ## Telas e funcionalidades prototipadas
 
 - Visão geral com indicadores, alertas de estoque baixo e movimentações recentes.
-- Catálogo com busca, filtro de estoque baixo e cadastro/edição de produtos.
+- Catálogo com busca, filtro por categoria ou estoque baixo e cadastro/edição de produtos.
 - Registro de entradas e saídas com validação de quantidade e saldo disponível.
 - Histórico com busca e filtro por tipo de movimentação.
+
+O fluxo parte da visão geral: os atalhos abrem os formulários de entrada ou saída, enquanto o catálogo concentra busca e manutenção dos produtos e o histórico reúne todos os registros. A navegação lateral leva diretamente a cada área, e o botão voltar do navegador retorna à tela anterior.
 
 ## Limites atuais e decisões pendentes
 
