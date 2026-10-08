@@ -67,7 +67,7 @@ O banco e o esquema estão preparados, mas as telas ainda não estão integradas
 ## Padrões visuais
 
 - **Ícones:** biblioteca Lucide, instalada como dependência local. Os ícones usam traço de 1,8 px e tamanhos definidos por contexto: 12, 16, 20 ou 24 px.
-- **Tipografia:** DM Sans para a interface; Playfair Display para a marca e destaques.
+- **Tipografia:** DM Sans em toda a interface, incluindo marca, títulos e destaques. As alternativas são Segoe UI, Arial e fontes genéricas sem serifa.
 - **Escala:** tamanhos de texto, espaçamentos, alturas de controles e raios de borda ficam centralizados como variáveis CSS em `styles.css`. A escala de espaçamento parte de 4 px.
 
 ## Decisões pendentes
