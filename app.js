@@ -26,11 +26,22 @@ let currentView = 'dashboard';
 let onlyLowStock = false;
 let toastTimer;
 
+const lucideIcons = Object.freeze({
+  leaf: 'leaf', grid: 'layout-dashboard', box: 'package', down: 'arrow-down-to-line',
+  up: 'arrow-up-from-line', chart: 'chart-no-axes-combined', search: 'search', plus: 'plus',
+  bell: 'bell', edit: 'pencil', chevron: 'chevron-right', menu: 'menu', close: 'x',
+  clock: 'clock-3', alert: 'triangle-alert', more: 'ellipsis', check: 'circle-check', error: 'circle-alert',
+});
+
 const money = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 const dateTime = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
 const shortDate = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short' });
 const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
-const icon = (name) => `<svg class="icon" aria-hidden="true"><use href="#i-${name}" /></svg>`;
+const icon = (name) => `<i class="icon" data-lucide="${lucideIcons[name] || 'circle-help'}" aria-hidden="true"></i>`;
+
+function renderLucideIcons(root = document) {
+  window.lucide?.createIcons({ root });
+}
 
 function stockState(product) {
   if (product.quantity === 0) return { label: 'Sem estoque', className: 'status-out' };
@@ -173,6 +184,7 @@ function render() {
   if (currentView === 'products') bindProductFilters();
   if (currentView === 'entry' || currentView === 'exit') bindMovementForm();
   if (currentView === 'reports') bindReportFilters();
+  renderLucideIcons(pageContent);
 }
 
 function setView(view) {
@@ -201,6 +213,7 @@ function bindProductFilters() {
       return matchesTerm && matchesCategory && matchesStock;
     });
     rows.innerHTML = productRows(filtered);
+    renderLucideIcons(rows);
     count.textContent = `${filtered.length} ${filtered.length === 1 ? 'produto' : 'produtos'}`;
   };
   search.addEventListener('input', update);
@@ -281,6 +294,7 @@ function openProductModal(productId = null) {
       <div class="form-field"><label for="productMinimum">Estoque mínimo</label><input class="form-control" id="productMinimum" name="minimum" type="number" min="0" step="1" value="${editing ? product.minimum : '5'}" /></div></div>
       <p class="modal-note">Este formulário é demonstrativo. As alterações ficam somente na memória do navegador até recarregar a página.</p>
       <div class="form-actions"><button class="button" type="button" data-close-modal>Cancelar</button><button class="button button-primary" type="submit">${editing ? 'Salvar alterações' : 'Cadastrar produto'}</button></div></form></div>`;
+  renderLucideIcons(modalRoot);
   document.getElementById('productName').focus();
   document.getElementById('productForm').addEventListener('submit', (event) => {
     event.preventDefault();
@@ -306,7 +320,8 @@ function openProductModal(productId = null) {
 
 function showToast(message, isError = false) {
   const region = document.getElementById('toastRegion');
-  region.innerHTML = `<div class="toast ${isError ? 'error' : ''}" role="status"><span class="toast-mark">${isError ? '!' : '✓'}</span><span>${escapeHtml(message)}</span></div>`;
+  region.innerHTML = `<div class="toast ${isError ? 'error' : ''}" role="status"><span class="toast-mark">${icon(isError ? 'error' : 'check')}</span><span>${escapeHtml(message)}</span></div>`;
+  renderLucideIcons(region);
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => { region.innerHTML = ''; }, 3200);
 }
@@ -339,3 +354,4 @@ document.body.append(overlay);
 
 document.getElementById('topbarDate').textContent = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date());
 render();
+renderLucideIcons(document);

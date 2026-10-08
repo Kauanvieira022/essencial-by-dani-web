@@ -27,6 +27,12 @@ A base do servidor e o esquema inicial do banco estão preparados. As tabelas `p
 
 A interface ainda usa dados demonstrativos em memória. A API de produtos e movimentações e a integração das telas com o banco serão implementadas nas próximas etapas. O front-end usa HTML, CSS e JavaScript sem frameworks; as fontes personalizadas carregam do Google Fonts com alternativas do sistema.
 
+## Padrões visuais
+
+- **Ícones:** biblioteca Lucide, instalada como dependência local. Os ícones usam traço de 1,8 px e tamanhos definidos por contexto: 12, 16, 20 ou 24 px.
+- **Tipografia:** DM Sans para a interface; Playfair Display fica restrita à marca e aos destaques.
+- **Escala:** tamanhos de texto, espaçamentos, alturas de controles e raios de borda são centralizados como variáveis CSS em `styles.css`. A escala de espaçamento parte de 4 px.
+
 ## Telas e funcionalidades prototipadas
 
 - Visão geral com indicadores, alertas de estoque baixo e movimentações recentes.

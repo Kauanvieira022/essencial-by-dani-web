@@ -13,6 +13,10 @@ app.get('/api/health', (_request, response) => {
   response.json({ status: 'ok', banco: 'SQLite' });
 });
 
+app.get('/vendor/lucide.js', (_request, response) => {
+  response.sendFile(path.join(projectRoot, 'node_modules', 'lucide', 'dist', 'umd', 'lucide.min.js'));
+});
+
 app.get('/', (_request, response) => {
   response.sendFile(path.join(projectRoot, 'index.html'));
 });
