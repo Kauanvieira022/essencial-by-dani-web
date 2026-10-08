@@ -4,12 +4,15 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#f5fafc" />
-    <meta name="description" content="Protótipo web de gestão de estoque da Essencial By Dani." />
+    <meta name="description" content="Sistema web de gestão de estoque da Essencial By Dani." />
     <title>Essencial By Dani | Estoque</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <div class="app-shell">
+    <div class="auth-root" id="authRoot" aria-live="polite">
+      <section class="auth-card system-message" role="status"><p>Verificando acesso…</p></section>
+    </div>
+    <div class="app-shell" id="appShell" hidden>
       <aside class="sidebar" id="sidebar">
         <button class="brand" type="button" aria-label="Essencial By Dani — início" data-view="dashboard">
           <span class="brand-name">essencial <b>by dani</b></span>
@@ -29,7 +32,7 @@
       <main class="main-area">
         <header class="topbar">
           <button class="icon-button mobile-menu" id="menuToggle" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="sidebar"><i class="icon" data-lucide="menu" aria-hidden="true"></i></button>
-          <div class="topbar-right"><span class="data-status" id="dataStatus"><i aria-hidden="true"></i><span>Conectando ao banco</span></span></div>
+          <div class="topbar-right"><span class="session-label" id="adminEmail"></span><button class="button logout-button" id="logoutButton" type="button"><i class="icon" data-lucide="log-out" aria-hidden="true"></i><span>Sair</span></button><span class="data-status" id="dataStatus"><i aria-hidden="true"></i><span>Conectando ao banco</span></span></div>
         </header>
         <div class="page-content" id="pageContent" tabindex="-1"></div>
       </main>

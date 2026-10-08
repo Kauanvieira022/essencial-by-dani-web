@@ -7,12 +7,16 @@ import { renderDashboard } from './screens/dashboard.js';
 import { renderProducts } from './screens/products.js';
 import { renderMovement } from './screens/movement.js';
 import { renderReports } from './screens/reports.js';
+import { renderLoginScreen } from './screens/login.js';
 
 const pageContent = document.getElementById('pageContent');
 const modalRoot = document.getElementById('modalRoot');
 const sidebar = document.getElementById('sidebar');
+const appShell = document.getElementById('appShell');
+const authRoot = document.getElementById('authRoot');
 let currentView = 'dashboard';
 let onlyLowStock = false;
+let isAuthenticated = false;
 let isLoading = true;
 let loadError = '';
 let movementReceipt = null;
@@ -28,6 +32,7 @@ const initialView = window.location.hash.slice(1);
 if (screenRenderers[initialView]) currentView = initialView;
 
 function render() {
+  if (!isAuthenticated) return;
   const label = viewLabels[currentView];
   updateDataStatus();
   document.getElementById('navProductCount').textContent = products.length;
@@ -54,6 +59,61 @@ function render() {
   if ((currentView === 'entry' || currentView === 'exit') && document.getElementById('movementForm')) bindMovementForm();
   if (currentView === 'reports') bindReportFilters();
   renderLucideIcons(pageContent);
+}
+
+function showLogin(error = '') {
+  isAuthenticated = false;
+  isLoading = true;
+  loadError = '';
+  modalRoot.innerHTML = '';
+  appShell.hidden = true;
+  authRoot.hidden = false;
+  authRoot.innerHTML = renderLoginScreen(error);
+  document.title = 'Acesso administrativo | Essencial By Dani';
+  renderLucideIcons(authRoot);
+
+  const form = document.getElementById('loginForm');
+  const email = document.getElementById('loginEmail');
+  const password = document.getElementById('loginPassword');
+  const errorMessage = document.getElementById('authError');
+  email.focus();
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const submitButton = form.querySelector('[type="submit"]');
+    submitButton.disabled = true;
+    errorMessage.hidden = true;
+    try {
+      const session = await api.login({ email: email.value.trim(), password: password.value });
+      activateSession(session.user);
+      await loadData();
+    } catch (requestError) {
+      errorMessage.textContent = requestError.message;
+      errorMessage.hidden = false;
+    } finally {
+      if (submitButton.isConnected) submitButton.disabled = false;
+    }
+  });
+}
+
+function activateSession(user) {
+  isAuthenticated = true;
+  authRoot.hidden = true;
+  appShell.hidden = false;
+  document.getElementById('adminEmail').textContent = user.email;
+  document.getElementById('adminEmail').setAttribute('aria-label', `Conta ${user.role}: ${user.email}`);
+  render();
+  renderLucideIcons(document);
+}
+
+async function initialize() {
+  try {
+    const status = await api.authStatus();
+    if (!status.authenticated || !status.user) return showLogin();
+    activateSession(status.user);
+    await loadData();
+  } catch (error) {
+    showLogin(error.message);
+  }
 }
 
 function updateDataStatus() {
@@ -334,11 +394,27 @@ document.getElementById('menuToggle').addEventListener('click', (event) => {
   event.currentTarget.setAttribute('aria-expanded', String(isOpen));
 });
 
+document.getElementById('logoutButton').addEventListener('click', async (event) => {
+  const button = event.currentTarget;
+  button.disabled = true;
+  try {
+    await api.logout();
+    showLogin();
+  } catch (error) {
+    showToast(error.message, true);
+  } finally {
+    if (button.isConnected) button.disabled = false;
+  }
+});
+
+window.addEventListener('auth-expired', (event) => {
+  showLogin(event.detail || 'Sua sessão expirou. Entre novamente.');
+});
+
 window.addEventListener('popstate', (event) => {
   const view = screenRenderers[window.location.hash.slice(1)] ? window.location.hash.slice(1) : 'dashboard';
   setView(view, { fromHistory: true, lowStock: Boolean(event.state?.lowStock) });
 });
 
-render();
 renderLucideIcons(document);
-loadData();
+initialize();

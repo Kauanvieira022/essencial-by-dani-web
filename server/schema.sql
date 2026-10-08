@@ -20,6 +20,13 @@ CREATE TABLE IF NOT EXISTS stock_movements (
   FOREIGN KEY (product_id) REFERENCES products (id) ON DELETE RESTRICT
 ) STRICT;
 
+CREATE TABLE IF NOT EXISTS auth_sessions (
+  token_hash TEXT PRIMARY KEY,
+  expires_at TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+) STRICT;
+
 CREATE INDEX IF NOT EXISTS idx_products_name ON products (name);
 CREATE INDEX IF NOT EXISTS idx_stock_movements_created_at ON stock_movements (created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_stock_movements_product_id ON stock_movements (product_id);
+CREATE INDEX IF NOT EXISTS idx_auth_sessions_expires_at ON auth_sessions (expires_at);
