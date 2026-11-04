@@ -1,105 +1,89 @@
-# Essencial By Dani — sistema web de gestão de estoque
+# Essencial By Dani - sistema web de gestão de estoque
 
-## O que é
+## Sobre o projeto
 
-O Essencial By Dani é um sistema web para organizar o estoque da loja. A proposta é reunir o catálogo de produtos, os saldos disponíveis, os alertas de reposição e o histórico de entradas e saídas em uma única interface.
+Aplicação web para organizar o catálogo de produtos da Essencial By Dani, acompanhar saldos, sinalizar itens no estoque mínimo e registrar entradas e saídas. A interface usa HTML, CSS e JavaScript; o servidor usa Node.js e Express; os dados são persistidos em SQLite. O navegador conversa com o servidor por uma API e não acessa o arquivo SQLite diretamente.
 
-O projeto usa HTML, CSS e JavaScript no front-end, Node.js e Express no servidor e SQLite como banco de dados. O navegador não acessa o arquivo do banco diretamente: a comunicação é feita por uma API no servidor. O acesso é restrito a uma conta com a função **Admin**, usada pela dona da loja.
+Neste estágio, o sistema não possui tela de login nem autenticação nas rotas da API. Execute-o apenas em ambiente local ou controlado; o acesso público deve aguardar a implementação de uma camada de autenticação.
 
-## Como usar o sistema
+## Requisitos
 
-### 1. Configurar o ambiente
+- Node.js 22 ou superior.
+- npm.
 
-Copie `.env.example` para `.env` na raiz do projeto. No PowerShell:
+## Configuração e inicialização
 
-```powershell
-Copy-Item .env.example .env
-```
+1. No terminal, acesse a pasta do projeto.
+2. Instale as dependências:
 
-Preencha `ADMIN_EMAIL` e `ADMIN_PASSWORD` com as credenciais da administradora. A senha deve ter de 12 a 128 caracteres. Gere um segredo para as sessões com:
+   ```sh
+   npm install
+   ```
 
-```sh
-node -e "console.log(require('node:crypto').randomBytes(48).toString('base64url'))"
-```
+3. Opcionalmente, copie o arquivo de exemplo de ambiente:
 
-Copie o resultado para `SESSION_SECRET`. O segredo precisa ter pelo menos 32 bytes. `DATABASE_PATH` é opcional; vazio, o banco fica na pasta de dados local do usuário. O `.env` está no `.gitignore`; não coloque credenciais reais no `.env.example` nem no repositório.
+   ```powershell
+   Copy-Item .env.example .env
+   ```
 
-Se a senha contiver `#` ou espaços, coloque o valor entre aspas no `.env`.
+   As variáveis disponíveis são `PORT` (padrão `3000`) e `DATABASE_PATH` (caminho opcional para o arquivo SQLite). Sem `DATABASE_PATH`, o banco fica na pasta local de dados do usuário, fora do repositório. O arquivo `.env` é ignorado pelo Git.
 
-Em produção, configure `NODE_ENV=production` e use HTTPS. Isso ativa o atributo `Secure` no cookie de sessão.
+4. Inicie o servidor em modo de desenvolvimento:
 
-### 2. Iniciar o sistema
+   ```sh
+   npm run dev
+   ```
 
-É necessário ter Node.js 22 ou superior instalado. Na pasta do projeto, execute:
+5. Abra `http://localhost:3000`. Para confirmar a conexão com o servidor e o SQLite, acesse `http://localhost:3000/api/health`.
 
-```sh
-npm install
-npm run dev
-```
+O servidor cria as tabelas automaticamente na primeira execução. O banco começa sem produtos nem movimentações de exemplo.
 
-Abra `http://localhost:3000` no navegador. O servidor inicializa o esquema SQLite e disponibiliza a rota `GET /api/health`. Na primeira execução, o catálogo e o histórico começam vazios; não há registros de exemplo.
+## Fluxo de utilização
 
-### 3. Entrar como Admin
+### 1. Visão geral
 
-Informe o e-mail e a senha configurados no `.env`. Existe apenas a função Admin, sem cadastro público de usuários. A sessão expira após 12 horas; use **Sair** no cabeçalho para encerrá-la antes.
+A tela inicial resume produtos cadastrados, unidades em estoque, itens que precisam de reposição e movimentações. Também apresenta saldo por categoria, produtos próximos do mínimo, histórico recente e atalhos para registrar entradas e saídas.
 
-### 4. Consultar a visão geral
+### 2. Produtos
 
-Na tela **Visão geral**, confira a quantidade de produtos e unidades, os itens que precisam de reposição, o saldo por categoria e as movimentações recentes. Se ainda não houver produtos, use **Cadastrar produto**. Os atalhos de entrada e saída ficam disponíveis para os próximos registros.
+No menu lateral, abra **Produtos** e escolha **Novo produto**. Informe nome, categoria e estoque mínimo; fornecedor e preço são opcionais. O estoque inicial pode ser informado no cadastro e, quando positivo, também fica registrado como entrada inicial. Para alterar os dados, use a ação de edição do produto.
 
-### 5. Cadastrar e localizar produtos
+A busca localiza produtos por nome, categoria ou fornecedor. Os filtros permitem selecionar uma categoria ou exibir apenas itens no mínimo ou abaixo dele.
 
-Abra **Produtos** no menu lateral e selecione **Novo produto**. Informe o nome, a categoria e o estoque mínimo. Fornecedor e preço são opcionais; informe o estoque inicial se houver saldo. Se o estoque inicial for maior que zero, o sistema registra também a entrada inicial no histórico. Para alterar um cadastro, use o botão de edição na linha do produto.
+### 3. Entrada de estoque
 
-Na mesma tela, pesquise por nome, categoria ou fornecedor. Também é possível filtrar por categoria ou mostrar apenas produtos no mínimo ou abaixo dele.
+Abra **Entrada de estoque**, selecione um produto, informe a quantidade recebida e, se necessário, escreva uma observação. Ao confirmar, o saldo é atualizado e a operação é gravada no histórico. A tela confirma o novo saldo e oferece atalhos para continuar.
 
-### 6. Registrar uma entrada
+### 4. Saída de estoque
 
-Abra **Entrada de estoque**, escolha o produto, informe a quantidade recebida e, se quiser, adicione uma observação, como a reposição do fornecedor. Confirme a entrada para atualizar o saldo no banco e incluir o registro no histórico. A confirmação mostra o novo saldo e oferece atalhos para outra movimentação ou para o histórico. Se não houver produtos, use **Cadastrar primeiro produto**.
+Abra **Saída de estoque**, escolha um produto com saldo e informe a quantidade retirada. O sistema rejeita quantidade maior que a disponível, evitando saldo negativo. A operação confirmada atualiza o saldo e entra no histórico.
 
-### 7. Registrar uma saída
+### 5. Movimentações
 
-Abra **Saída de estoque**, escolha um produto que tenha saldo, informe a quantidade retirada e, opcionalmente, escreva uma observação. Produtos sem saldo ficam indisponíveis e a quantidade não pode ultrapassar o saldo atual. Confirme a saída para atualizar o saldo no banco e registrar a movimentação. A confirmação mostra o novo saldo e oferece atalhos para outra movimentação ou para o histórico.
+Na tela **Movimentações**, consulte as entradas e saídas em ordem cronológica. A busca considera o nome do produto e a observação; os filtros podem limitar por tipo, produto e período.
 
-### 8. Consultar movimentações
-
-Abra **Movimentações** para consultar entradas e saídas. Use a busca para localizar registros por produto ou observação; os filtros permitem restringir por tipo, produto e período. Os registros mais recentes aparecem primeiro.
-
-O menu lateral permite alternar entre as telas; os botões voltar e avançar do navegador também acompanham a navegação.
-
-> **Atenção:** o sistema inicia sem produtos ou movimentações de exemplo. Cadastros e movimentações são gravados no SQLite e continuam disponíveis depois de fechar ou recarregar a página.
+O menu lateral e os botões de voltar/avançar do navegador permitem alternar entre as telas. Os dados continuam disponíveis após recarregar a página, pois são armazenados no SQLite.
 
 ## Organização do projeto
 
-- `.env.example`: modelo sem credenciais para criar o `.env` local.
-- `client/data`: estado carregado pela API, categorias disponíveis e rótulos das telas.
-- `client/lib/api.js`: comunicação do navegador com as rotas do servidor.
-- `client/components`: componentes reutilizáveis, como o formulário de produto e os avisos.
+- `client/data`: estado carregado pela API, categorias e rótulos das telas.
+- `client/lib/api.js`: chamadas HTTP do navegador.
+- `client/components`: componentes reutilizáveis, como formulário de produto e avisos.
 - `client/lib`: formatação, ícones e elementos compartilhados da interface.
-- `client/screens`: apresentação de cada tela, incluindo o login.
-- `client/app.js`: navegação e coordenação das ações e dos formulários.
-- `server`: configuração privada, autenticação, rotas da API, banco SQLite, serialização dos registros e esquema das tabelas.
+- `client/screens`: apresentação do painel, catálogo, movimentações e consultas.
+- `client/app.js`: navegação e coordenação dos formulários.
+- `server/routes`: rotas de produtos e movimentações.
+- `server/database.js` e `server/schema.sql`: conexão e estrutura do SQLite.
+- `server/serializers.js`: conversão dos registros do banco para as respostas da API.
 
-O front-end usa módulos JavaScript nativos, sem framework ou etapa de compilação.
+O front-end usa módulos JavaScript nativos, sem framework ou etapa de compilação. Os ícones são da biblioteca Lucide; a tipografia principal é DM Sans, com alternativas sem serifa definidas no CSS.
 
-## Banco de dados e estado atual
+## Banco de dados e funcionamento
 
-O servidor cria as tabelas `products`, `stock_movements` e `auth_sessions` na inicialização. O preço é armazenado em centavos para evitar imprecisão decimal, e as movimentações mantêm vínculo com o produto.
+O esquema cria as tabelas `products` e `stock_movements`, com índices para busca e ordenação. O preço é guardado em centavos para evitar imprecisão decimal. Cada movimentação referencia um produto existente. A inclusão do produto, o ajuste de saldo e o registro de movimento usam transações para manter os dados consistentes.
 
-Por padrão, o arquivo SQLite fica fora do repositório, na pasta de dados local do usuário. A variável de ambiente `DATABASE_PATH` permite definir outro caminho. O banco e os arquivos auxiliares não devem ser versionados.
+Por padrão, o arquivo SQLite e seus arquivos auxiliares ficam fora do repositório. `DATABASE_PATH` permite escolher outro destino; bancos, credenciais e cópias de segurança não devem ser versionados.
 
-As telas usam a API para autenticar a administradora, listar e cadastrar produtos, editar cadastros, criar movimentações e consultar o histórico. As rotas de produtos e movimentações exigem uma sessão válida. A senha não é armazenada no SQLite; o servidor mantém sessões com tokens aleatórios, salva somente o HMAC do token e usa um cookie `HttpOnly`, `SameSite=Strict`, com validade de 12 horas. Após cinco tentativas de login incorretas, novas tentativas do mesmo endereço ficam temporariamente limitadas.
+## Escopo atual e próximos ajustes
 
-Para trocar a senha, atualize `ADMIN_PASSWORD` no `.env` e reinicie o servidor. Para invalidar também as sessões abertas, gere um novo `SESSION_SECRET` e reinicie o sistema.
-
-## Padrões visuais
-
-- **Ícones:** biblioteca Lucide, instalada como dependência local. Os ícones usam traço de 1,8 px e tamanhos definidos por contexto: 12, 16, 20 ou 24 px.
-- **Tipografia:** DM Sans em toda a interface, incluindo marca, títulos e destaques. As alternativas são Segoe UI, Arial e fontes genéricas sem serifa.
-- **Escala:** tamanhos de texto, espaçamentos, alturas de controles e raios de borda ficam centralizados como variáveis CSS em `styles.css`. A escala de espaçamento parte de 4 px.
-
-## Decisões pendentes
-
-O cadastro inclui o preço do produto, conforme o sistema de referência. O documento também menciona “valores” das movimentações, mas não esclarece se são valores monetários ou quantidades. Por isso, as telas de entrada e saída mostram quantidade e observação; o significado de valores por movimentação precisa ser definido antes da implementação dessa regra.
-
-As categorias disponíveis estão definidas no protótipo. A paleta azul e rosa é provisória e deriva das cores usadas na janela principal do aplicativo de referência; não substitui um guia oficial de marca.
+As telas principais e a integração entre navegador, API Express e SQLite estão implementadas. Ainda é necessário validar o uso com a proprietária, definir como serão tratados os valores monetários associados às movimentações e preparar autenticação e implantação antes de disponibilizar a aplicação fora de um ambiente controlado. Os filtros de movimentações são consultas em tela; não há exportação de relatórios.

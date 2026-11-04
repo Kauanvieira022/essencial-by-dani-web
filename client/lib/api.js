@@ -13,9 +13,6 @@ async function request(path, options = {}) {
   if (!response.ok) {
     const error = new Error(payload.erro || 'Não foi possível concluir a operação.');
     error.status = response.status;
-    if (response.status === 401 && !path.startsWith('/api/auth/')) {
-      window.dispatchEvent(new CustomEvent('auth-expired', { detail: error.message }));
-    }
     throw error;
   }
   return payload;
@@ -24,9 +21,6 @@ async function request(path, options = {}) {
 const jsonBody = (data) => JSON.stringify(data);
 
 export const api = {
-  authStatus: () => request('/api/auth/status'),
-  login: (data) => request('/api/auth/login', { method: 'POST', body: jsonBody(data) }),
-  logout: () => request('/api/auth/logout', { method: 'POST' }),
   listProducts: () => request('/api/products'),
   createProduct: (data) => request('/api/products', { method: 'POST', body: jsonBody(data) }),
   updateProduct: (id, data) => request(`/api/products/${id}`, { method: 'PUT', body: jsonBody(data) }),
