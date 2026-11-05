@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS stock_movements (
   product_id INTEGER NOT NULL,
   type TEXT NOT NULL CHECK (type IN ('entrada', 'saida')),
   quantity INTEGER NOT NULL CHECK (quantity > 0),
+  total_value_cents INTEGER CHECK (total_value_cents IS NULL OR total_value_cents >= 0),
   observation TEXT NOT NULL DEFAULT '',
   created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
   FOREIGN KEY (product_id) REFERENCES products (id) ON DELETE RESTRICT

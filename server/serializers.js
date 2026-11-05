@@ -21,6 +21,8 @@ function serializeMovement(row) {
     productName: row.product_name,
     type: row.type === 'entrada' ? 'Entrada' : 'Saída',
     quantity: row.quantity,
+    totalValueCents: row.total_value_cents == null ? null : row.total_value_cents,
+    totalValue: row.total_value_cents == null ? null : row.total_value_cents / 100,
     note: row.observation,
     date: row.created_at,
   };

@@ -2,7 +2,7 @@ const express = require('express');
 const { serializeProduct, serializeMovement } = require('../serializers');
 
 const productColumns = `id, name, category, supplier, price_cents, stock_quantity, minimum_stock, created_at, updated_at`;
-const movementColumns = `m.id, m.product_id, p.name AS product_name, m.type, m.quantity, m.observation, m.created_at`;
+const movementColumns = `m.id, m.product_id, p.name AS product_name, m.type, m.quantity, m.total_value_cents, m.observation, m.created_at`;
 
 function parseProduct(body, includeQuantity) {
   if (!body || typeof body !== 'object' || Array.isArray(body)) return { error: 'Envie os dados do produto em formato JSON.' };

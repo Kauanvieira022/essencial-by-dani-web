@@ -2,6 +2,7 @@ const lucideIcons = Object.freeze({
   grid: 'layout-dashboard', box: 'package', down: 'arrow-down-to-line', up: 'arrow-up-from-line',
   chart: 'chart-no-axes-combined', search: 'search', plus: 'plus', edit: 'pencil', close: 'x',
   alert: 'triangle-alert', check: 'circle-check', error: 'circle-alert',
+  download: 'download', printer: 'printer',
 });
 
 const money = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -34,7 +35,7 @@ export function movementType(type) {
 }
 
 export function movementRows(list, products, emptyText = 'Nenhuma movimentação encontrada.') {
-  if (!list.length) return `<tr><td colspan="6"><div class="empty-state">${emptyText}</div></td></tr>`;
+  if (!list.length) return `<tr><td colspan="7"><div class="empty-state">${emptyText}</div></td></tr>`;
   return list.map((movement) => {
     const product = productById(products, movement.productId);
     return `<tr>
@@ -42,6 +43,7 @@ export function movementRows(list, products, emptyText = 'Nenhuma movimentação
       <td class="main-cell">${escapeHtml(product?.name || 'Produto não encontrado')}</td>
       <td>${movementType(movement.type)}</td>
       <td class="main-cell">${movement.type === 'Entrada' ? '+' : '−'}${movement.quantity} un.</td>
+      <td class="main-cell">${movement.totalValue == null ? '<span title="Valor não informado para este registro">—</span>' : formatMoney(movement.totalValue)}</td>
       <td>${escapeHtml(movement.note || '—')}</td>
       <td class="movement-date">${formatDateTime(movement.date)}</td>
     </tr>`;

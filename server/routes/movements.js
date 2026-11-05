@@ -2,7 +2,7 @@ const express = require('express');
 const { serializeProduct, serializeMovement } = require('../serializers');
 
 const productColumns = `id, name, category, supplier, price_cents, stock_quantity, minimum_stock, created_at, updated_at`;
-const movementColumns = `m.id, m.product_id, p.name AS product_name, m.type, m.quantity, m.observation, m.created_at`;
+const movementColumns = `m.id, m.product_id, p.name AS product_name, m.type, m.quantity, m.total_value_cents, m.observation, m.created_at`;
 
 function parseId(value) {
   if (!/^\d+$/.test(String(value))) return null;
@@ -29,14 +29,16 @@ function parseMovement(body) {
   const typeValue = typeof body.type === 'string' ? body.type.trim().toLocaleLowerCase('pt-BR') : '';
   const type = typeValue === 'entrada' ? 'entrada' : typeValue === 'saida' || typeValue === 'saída' ? 'saida' : null;
   const quantity = body.quantity;
+  const totalValue = body.totalValue;
   const observation = body.note === undefined ? '' : typeof body.note === 'string' ? body.note.trim() : null;
 
   if (!productId) return { error: 'Selecione um produto válido.' };
   if (!type) return { error: 'O tipo deve ser entrada ou saída.' };
   if (!Number.isSafeInteger(quantity) || quantity <= 0) return { error: 'A quantidade deve ser um inteiro maior que zero.' };
+  if (typeof totalValue !== 'number' || !Number.isFinite(totalValue) || totalValue < 0 || !Number.isSafeInteger(Math.round(totalValue * 100)) || Math.abs(totalValue * 100 - Math.round(totalValue * 100)) > 1e-8) return { error: 'Informe um valor total válido, não negativo e com até duas casas decimais.' };
   if (observation === null || observation.length > 240) return { error: 'A observação deve ter até 240 caracteres.' };
 
-  return { value: { productId, type, quantity, observation } };
+  return { value: { productId, type, quantity, totalValueCents: Math.round(totalValue * 100), observation } };
 }
 
 function createMovementsRouter(database) {
@@ -109,8 +111,8 @@ function createMovementsRouter(database) {
         const newQuantity = product.stock_quantity + (movement.type === 'entrada' ? movement.quantity : -movement.quantity);
         database.prepare(`UPDATE products SET stock_quantity = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ?`)
           .run(newQuantity, movement.productId);
-        const inserted = database.prepare(`INSERT INTO stock_movements (product_id, type, quantity, observation) VALUES (?, ?, ?, ?)`)
-          .run(movement.productId, movement.type, movement.quantity, movement.observation);
+        const inserted = database.prepare(`INSERT INTO stock_movements (product_id, type, quantity, total_value_cents, observation) VALUES (?, ?, ?, ?, ?)`)
+          .run(movement.productId, movement.type, movement.quantity, movement.totalValueCents, movement.observation);
 
         return {
           movement: serializeMovement(getMovement.get(Number(inserted.lastInsertRowid))),

@@ -4,7 +4,7 @@
 
 Aplicação web para organizar o catálogo de produtos da Essencial By Dani, acompanhar saldos, sinalizar itens no estoque mínimo e registrar entradas e saídas. A interface usa HTML, CSS e JavaScript; o servidor usa Node.js e Express; os dados são persistidos em SQLite. O navegador conversa com o servidor por uma API e não acessa o arquivo SQLite diretamente.
 
-Neste estágio, o sistema não possui tela de login nem autenticação nas rotas da API. Execute-o apenas em ambiente local ou controlado; o acesso público deve aguardar a implementação de uma camada de autenticação.
+O sistema foi preparado para uso local, sem tela de login, e o servidor escuta somente em `127.0.0.1`. Ele não fica disponível para outros dispositivos da rede. Não altere esse endereço nem exponha a API publicamente sem implementar autenticação.
 
 ## Requisitos
 
@@ -34,7 +34,7 @@ Neste estágio, o sistema não possui tela de login nem autenticação nas rotas
    npm run dev
    ```
 
-5. Abra `http://localhost:3000`. Para confirmar a conexão com o servidor e o SQLite, acesse `http://localhost:3000/api/health`.
+5. Abra `http://127.0.0.1:3000`. Para confirmar a conexão com o servidor e o SQLite, acesse `http://127.0.0.1:3000/api/health`.
 
 O servidor cria as tabelas automaticamente na primeira execução. O banco começa sem produtos nem movimentações de exemplo.
 
@@ -52,15 +52,15 @@ A busca localiza produtos por nome, categoria ou fornecedor. Os filtros permitem
 
 ### 3. Entrada de estoque
 
-Abra **Entrada de estoque**, selecione um produto, informe a quantidade recebida e, se necessário, escreva uma observação. Ao confirmar, o saldo é atualizado e a operação é gravada no histórico. A tela confirma o novo saldo e oferece atalhos para continuar.
+Abra **Entrada de estoque**, selecione um produto, informe a quantidade recebida e o valor total pago pela reposição. Se necessário, escreva uma observação. O valor fica registrado na própria movimentação em centavos, sem depender do preço atual do produto. Ao confirmar, o saldo é atualizado e a operação aparece no histórico.
 
 ### 4. Saída de estoque
 
-Abra **Saída de estoque**, escolha um produto com saldo e informe a quantidade retirada. O sistema rejeita quantidade maior que a disponível, evitando saldo negativo. A operação confirmada atualiza o saldo e entra no histórico.
+Abra **Saída de estoque**, escolha um produto com saldo e informe a quantidade retirada e o valor total recebido. Para uma saída sem valor financeiro, informe R$ 0,00. O sistema rejeita quantidade maior que a disponível, evitando saldo negativo. A operação confirmada atualiza o saldo e entra no histórico.
 
 ### 5. Movimentações
 
-Na tela **Movimentações**, consulte as entradas e saídas em ordem cronológica. A busca considera o nome do produto e a observação; os filtros podem limitar por tipo, produto e período.
+Na tela **Movimentações**, consulte as entradas e saídas, quantidades e valores em ordem cronológica. A busca considera o nome do produto e a observação; os filtros podem limitar por tipo, produto e período. **Exportar CSV** baixa os registros que correspondem aos filtros ativos. **Salvar em PDF** abre a impressão do navegador, onde é possível selecionar a opção de salvar como PDF.
 
 O menu lateral e os botões de voltar/avançar do navegador permitem alternar entre as telas. Os dados continuam disponíveis após recarregar a página, pois são armazenados no SQLite.
 
@@ -80,10 +80,10 @@ O front-end usa módulos JavaScript nativos, sem framework ou etapa de compilaç
 
 ## Banco de dados e funcionamento
 
-O esquema cria as tabelas `products` e `stock_movements`, com índices para busca e ordenação. O preço é guardado em centavos para evitar imprecisão decimal. Cada movimentação referencia um produto existente. A inclusão do produto, o ajuste de saldo e o registro de movimento usam transações para manter os dados consistentes.
+O esquema cria as tabelas `products` e `stock_movements`, com índices para busca e ordenação. O preço do produto e o valor total próprio de cada movimentação são guardados em centavos para evitar imprecisão decimal. O valor histórico não muda quando o preço atual do produto é editado. Movimentações antigas e entradas de saldo inicial sem valor conhecido permanecem sem valor financeiro; os totais e exportações as identificam em branco. Cada movimentação referencia um produto existente. A inclusão do produto, o ajuste de saldo e o registro de movimento usam transações para manter os dados consistentes. Na primeira inicialização após esta atualização, a coluna de valor é adicionada automaticamente sem apagar os registros existentes.
 
 Por padrão, o arquivo SQLite e seus arquivos auxiliares ficam fora do repositório. `DATABASE_PATH` permite escolher outro destino; bancos, credenciais e cópias de segurança não devem ser versionados.
 
 ## Escopo atual e próximos ajustes
 
-As telas principais e a integração entre navegador, API Express e SQLite estão implementadas. Ainda é necessário validar o uso com a proprietária, definir como serão tratados os valores monetários associados às movimentações e preparar autenticação e implantação antes de disponibilizar a aplicação fora de um ambiente controlado. Os filtros de movimentações são consultas em tela; não há exportação de relatórios.
+As telas principais, a integração entre navegador, API Express e SQLite, os valores por movimentação e as exportações CSV e PDF estão implementados. As próximas etapas são validar o fluxo e o significado dos valores com a proprietária, cadastrar e conferir o estoque real, definir e praticar backup e restauração do banco e criar testes automatizados. A configuração atual é local e sem login; qualquer acesso por rede ou publicação externa exigirá autenticação e revisão da implantação.

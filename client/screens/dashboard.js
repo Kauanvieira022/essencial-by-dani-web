@@ -25,6 +25,6 @@ export function renderDashboard({ products, movements, categoryOptions }) {
       </article>
     </section>
     <section class="panel movement-panel"><div class="panel-heading"><div><h2>Movimentações recentes</h2></div><button class="text-link" type="button" data-view="reports">Ver histórico →</button></div>
-      <div class="table-wrap"><table class="data-table"><thead><tr><th>Código</th><th>Produto</th><th>Movimento</th><th>Quantidade</th><th>Observação</th><th>Data e hora</th></tr></thead><tbody>${movementRows(latest, products)}</tbody></table></div>
+      <div class="table-wrap"><table class="data-table"><thead><tr><th>Código</th><th>Produto</th><th>Movimento</th><th>Quantidade</th><th>Valor total</th><th>Observação</th><th>Data e hora</th></tr></thead><tbody>${movementRows(latest, products)}</tbody></table></div>
     </section>`;
 }

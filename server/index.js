@@ -47,8 +47,8 @@ app.use((_request, response) => {
 });
 
 if (require.main === module) {
-  app.listen(port, () => {
-    console.log(`Sistema disponível em http://localhost:${port}`);
+  app.listen(port, '127.0.0.1', () => {
+    console.log(`Sistema disponível em http://127.0.0.1:${port}`);
   });
 }
 

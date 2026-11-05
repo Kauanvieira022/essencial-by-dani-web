@@ -1,5 +1,5 @@
 import { categoryOptions, movements, products, replaceMovements, replaceProducts, viewLabels } from './data/state.js';
-import { escapeHtml, movementRows, productById, productRows, renderLucideIcons } from './lib/ui.js';
+import { escapeHtml, formatMoney, movementRows, productById, productRows, renderLucideIcons } from './lib/ui.js';
 import { api } from './lib/api.js';
 import { renderProductModal } from './components/product-modal.js';
 import { showToast } from './components/toast.js';
@@ -162,9 +162,13 @@ function bindMovementForm() {
     event.preventDefault();
     const product = productById(products, select.value);
     const rawQuantity = document.getElementById('movementQuantity').value.trim();
+    const rawTotalValue = document.getElementById('movementTotalValue').value.trim().replace(',', '.');
     const note = document.getElementById('movementNote').value.trim();
     if (!product) return showToast('Selecione um produto cadastrado.', true);
     if (!/^\d+$/.test(rawQuantity) || !Number.isSafeInteger(Number(rawQuantity)) || Number(rawQuantity) <= 0) return showToast('Informe uma quantidade inteira válida maior que zero.', true);
+    if (!/^\d+(?:\.\d{1,2})?$/.test(rawTotalValue)) return showToast('Informe o valor total com até duas casas decimais.', true);
+    const totalValue = Number(rawTotalValue);
+    if (!Number.isFinite(totalValue) || totalValue < 0 || !Number.isSafeInteger(Math.round(totalValue * 100))) return showToast('Informe um valor total válido e não negativo.', true);
     const quantity = Number(rawQuantity);
     const type = form.dataset.movementType;
     if (type === 'Saída' && quantity > product.quantity) return showToast(`Saldo insuficiente. Há ${product.quantity} unidade(s) disponível(is).`, true);
@@ -175,6 +179,7 @@ function bindMovementForm() {
         productId: product.id,
         type: type === 'Entrada' ? 'entrada' : 'saida',
         quantity,
+        totalValue,
         note,
       });
       upsertProduct(saved.product);
@@ -183,6 +188,7 @@ function bindMovementForm() {
         type,
         productName: saved.product.name,
         quantity: saved.movement.quantity,
+        totalValue: saved.movement.totalValue,
         balance: saved.product.quantity,
       } : null;
       render();
@@ -203,6 +209,30 @@ function bindReportFilters() {
   const dateTo = document.getElementById('dateToFilter');
   const rows = document.getElementById('reportRows');
   const count = document.getElementById('reportResultCount');
+  const printMeta = document.getElementById('reportPrintMeta');
+  const exportCsv = document.getElementById('exportCsv');
+  const exportPdf = document.getElementById('exportPdf');
+  const reportMetricValues = document.querySelectorAll('.report-metrics .metric-value');
+  let filteredRows = [];
+  const updateReportMetrics = (rows) => {
+    const entryRows = rows.filter((movement) => movement.type === 'Entrada');
+    const exitRows = rows.filter((movement) => movement.type === 'Saída');
+    const entryUnits = entryRows.reduce((sum, movement) => sum + movement.quantity, 0);
+    const exitUnits = exitRows.reduce((sum, movement) => sum + movement.quantity, 0);
+    const entryCents = entryRows.reduce((sum, movement) => sum + (movement.totalValueCents ?? 0), 0);
+    const exitCents = exitRows.reduce((sum, movement) => sum + (movement.totalValueCents ?? 0), 0);
+    [entryUnits, exitUnits, entryUnits - exitUnits, formatMoney(entryCents / 100), formatMoney(exitCents / 100)]
+      .forEach((value, index) => { reportMetricValues[index].textContent = value; });
+  };
+  const updatePrintMeta = () => {
+    const filters = [];
+    if (search.value.trim()) filters.push(`Busca: ${search.value.trim()}`);
+    if (type.value) filters.push(`Tipo: ${type.selectedOptions[0].textContent}`);
+    if (productFilter.value) filters.push(`Produto: ${productFilter.selectedOptions[0].textContent}`);
+    if (dateFrom.value) filters.push(`A partir de: ${dateFrom.value}`);
+    if (dateTo.value) filters.push(`Até: ${dateTo.value}`);
+    printMeta.textContent = `Gerado em ${new Date().toLocaleString('pt-BR')} · ${filteredRows.length} registros · ${filters.length ? filters.join(' | ') : 'Sem filtros'}`;
+  };
   const update = () => {
     const term = search.value.trim().toLocaleLowerCase('pt-BR');
     const selectedType = type.value;
@@ -210,8 +240,11 @@ function bindReportFilters() {
     const from = dateFrom.value;
     const to = dateTo.value;
     if (from && to && from > to) {
+      filteredRows = [];
+      updateReportMetrics(filteredRows);
       rows.innerHTML = movementRows([], products, 'A data inicial deve ser anterior ou igual à data final.');
       count.textContent = 'Período inválido';
+      updatePrintMeta();
       renderLucideIcons(rows);
       return;
     }
@@ -225,16 +258,56 @@ function bindReportFilters() {
         && (!from || movementDate >= from)
         && (!to || movementDate <= to);
     });
-    rows.innerHTML = movementRows(filtered, products, 'Nenhuma movimentação corresponde aos filtros.');
+    filteredRows = filtered;
+    updateReportMetrics(filteredRows);
+    rows.innerHTML = movementRows(filteredRows, products, 'Nenhuma movimentação corresponde aos filtros.');
     renderLucideIcons(rows);
-    count.textContent = `${filtered.length} ${filtered.length === 1 ? 'registro' : 'registros'}`;
+    count.textContent = `${filteredRows.length} ${filteredRows.length === 1 ? 'registro' : 'registros'}`;
+    updatePrintMeta();
   };
   search.addEventListener('input', update);
   type.addEventListener('change', update);
   productFilter.addEventListener('change', update);
   dateFrom.addEventListener('change', update);
   dateTo.addEventListener('change', update);
+  exportCsv.addEventListener('click', () => downloadMovementCsv(filteredRows));
+  exportPdf.addEventListener('click', () => window.print());
   update();
+}
+
+function csvText(value) {
+  let text = String(value ?? '');
+  if (/^[\u0000-\u0020]*[=+\-@]/.test(text)) text = `'${text}`;
+  return `"${text.replace(/"/g, '""')}"`;
+}
+
+function downloadMovementCsv(rows) {
+  const columns = ['Código', 'Data e hora', 'Produto', 'Tipo', 'Quantidade', 'Valor total (R$)', 'Observação'];
+  const lines = [columns.map(csvText).join(';')];
+  for (const movement of rows) {
+    const product = productById(products, movement.productId);
+    const date = new Date(movement.date).toLocaleString('pt-BR');
+    const value = movement.totalValueCents == null ? '' : (movement.totalValueCents / 100).toFixed(2).replace('.', ',');
+    lines.push([
+      String(movement.id),
+      csvText(date),
+      csvText(product?.name || 'Produto não encontrado'),
+      csvText(movement.type),
+      String(movement.quantity),
+      value,
+      csvText(movement.note || ''),
+    ].join(';'));
+  }
+
+  const blob = new Blob([`\uFEFF${lines.join('\r\n')}`], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `essencial-by-dani-movimentacoes-${localDateKey(new Date())}.csv`;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 function localDateKey(value) {

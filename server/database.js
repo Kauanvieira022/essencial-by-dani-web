@@ -17,4 +17,11 @@ database.pragma('journal_mode = WAL');
 database.pragma('busy_timeout = 5000');
 database.exec(fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8'));
 
+const movementColumns = database.pragma('table_info(stock_movements)');
+if (!movementColumns.some((column) => column.name === 'total_value_cents')) {
+  database.exec(`ALTER TABLE stock_movements
+    ADD COLUMN total_value_cents INTEGER
+    CHECK (total_value_cents IS NULL OR total_value_cents >= 0)`);
+}
+
 module.exports = database;
